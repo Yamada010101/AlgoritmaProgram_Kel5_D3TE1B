@@ -1,28 +1,27 @@
+// Program antrean dan daftar pasien untuk poliklinik
+// Oleh kelompoak 5, D3 Teknik Elektronika 1B
 
 #include <iostream>
 #include <string>
 #include <ctime>
 #include <iomanip>
-#include <sstream>
+#include <sstream> 
 #include <cctype>
 #include <cstdlib>
 
 using namespace std;
 
-// ==========================================
+
 // DEKLARASI KONSTANTA
-// ==========================================
 
-const int MAX_PASIEN = 100;
-const int MAX_KUNJUNGAN = 500;
-const int MAX_PERIKSA = 500;
+ #define MAX_PASIEN  100
+ #define MAX_KUNJUNGAN  500
+ #define MAX_PERIKSA  500
 
-const string PASSWORD_DOKTER = "123456789";
+ string PASSWORD_DOKTER = "123456789";
 
-// ==========================================
-// STRUKTUR DATA
-// ==========================================
 
+// =================================================== STRUKTUR DATA ==========================================================================
 // Menyimpan identitas unik setiap pasien
 struct Pasien {
     string nama;
@@ -38,6 +37,7 @@ struct Kunjungan {
     string noPendaftaran;
     string noAntrean;
     string tanggalKunjungan;
+    string waktuKunjungan;
     string keluhan;
     bool sudahDiperiksa;
 };
@@ -48,12 +48,13 @@ struct Pemeriksaan {
     string noPendaftaran;
     string namaDokter;
     string tanggalPeriksa;
+    string waktuPeriksa;
     string catatan;
 };
 
-// ==========================================
-// DEKLARASI ARRAY DAN VARIABEL
-// ==========================================
+
+
+// =================================================== DEKLARASI ARRAY DAN VARIABEL =========================================================
 
 // Data identitas seluruh pasien
 Pasien dataPasien[MAX_PASIEN];
@@ -74,27 +75,18 @@ int jumlahPeriksa = 0;
 
 int totalPendaftaran = 0;
 
-// ==========================================
 // FUNGSI MEMBERSIHKAN LAYAR
-// ==========================================
-
 void hapusLayar() {
     system("cls");
 }
 
-// ==========================================
 // FUNGSI MENUNGGU ENTER
-// ==========================================
-
 void tungguEnter() {
     cout << "\nTekan ENTER untuk melanjutkan...";
     cin.get();
 }
 
-// ==========================================
 // FUNGSI VALIDASI NIK
-// ==========================================
-
 bool validasiNIK(string nik) {
 
     if (nik.length() != 16) {
@@ -111,12 +103,9 @@ bool validasiNIK(string nik) {
     return true;
 }
 
-// ==========================================
 // FUNGSI INPUT ANGKA BULAT
-// ==========================================
-
 int inputInteger(string pesan, bool bolehNol = false) {
-
+	
     string input;
     int nilai;
     char sisa;
@@ -139,10 +128,8 @@ int inputInteger(string pesan, bool bolehNol = false) {
     }
 }
 
-// ==========================================
-// FUNGSI INPUT ANGKA DESIMAL
-// ==========================================
 
+// FUNGSI INPUT ANGKA DESIMAL
 float inputFloat(string pesan) {
 
     string input;
@@ -164,10 +151,8 @@ float inputFloat(string pesan) {
     }
 }
 
-// ==========================================
-// MENCARI IDENTITAS PASIEN BERDASARKAN NIK
-// ==========================================
 
+// MENCARI IDENTITAS PASIEN BERDASARKAN NIK
 int cariPasien(string nik) {
 
     for (int i = 0; i < jumlahPasien; i++) {
@@ -180,10 +165,8 @@ int cariPasien(string nik) {
     return -1;
 }
 
-// ==========================================
-// MENCARI PASIEN DI ANTREAN AKTIF
-// ==========================================
 
+// MENCARI PASIEN DI ANTREAN AKTIF
 int cariPasienDalamAntrean(string nik) {
 
     for (int i = 0; i < jumlahAntrean; i++) {
@@ -198,10 +181,8 @@ int cariPasienDalamAntrean(string nik) {
     return -1;
 }
 
-// ==========================================
-// MENCARI PEMERIKSAAN BERDASARKAN PENDAFTARAN
-// ==========================================
 
+// MENCARI PEMERIKSAAN BERDASARKAN PENDAFTARAN
 int cariPemeriksaan(string noPendaftaran) {
 
     for (int i = 0; i < jumlahPeriksa; i++) {
@@ -214,10 +195,8 @@ int cariPemeriksaan(string noPendaftaran) {
     return -1;
 }
 
-// ==========================================
-// FUNGSI MENGHAPUS PASIEN DARI ANTREAN
-// ==========================================
 
+// FUNGSI MENGHAPUS PASIEN DARI ANTREAN
 void hapusPasienAntrian(int posisi) {
 
     for (int i = posisi; i < jumlahAntrean - 1; i++) {
@@ -228,10 +207,8 @@ void hapusPasienAntrian(int posisi) {
     jumlahAntrean--;
 }
 
-// ==========================================
-// FUNGSI MEMBUAT TANGGAL
-// ==========================================
 
+// FUNGSI MEMBUAT TANGGAL
 string buatTanggal(bool besok) {
 
     time_t sekarang = time(0);
@@ -248,23 +225,53 @@ string buatTanggal(bool besok) {
 
     stringstream tanggal;
 
-    tanggal << setfill('0')
-            << setw(2) << waktu.tm_mday << "-"
-            << setw(2) << waktu.tm_mon + 1 << "-"
-            << waktu.tm_year + 1900;
+    tanggal << setfill('0') // kalau ada tempat kosong, isi dengan angka 0
+            << setw(2) << waktu.tm_mday << "-" //angka berikutnya harus selebar 2 karakter untuk hari
+            << setw(2) << waktu.tm_mon + 1 << "-" //angka berikutnya harus selebar 2 karakter untuk bulan 
+            << waktu.tm_year + 1900; //Tulis tahun (komputer menyimpan selisih dari 1900)
 
     return tanggal.str();
 }
 
-// ==========================================
-// DASHBOARD UTAMA
-// ==========================================
+// Mengambil waktu saat ini dari komputer
+string buatWaktu() {
+    time_t sekarang = time(0);
+    tm *waktuPtr = localtime(&sekarang);
 
+    stringstream jam;
+    jam << setfill('0')
+        << setw(2) << waktuPtr->tm_hour << ":"
+        << setw(2) << waktuPtr->tm_min << ":"
+        << setw(2) << waktuPtr->tm_sec;
+
+    return jam.str();
+}
+
+// Mengambil tanggal saat ini dari komputer
+string tanggalSekarang() {
+    time_t sekarang = time(0);
+    tm *waktuPtr = localtime(&sekarang);
+
+    stringstream tanggal;
+    tanggal << setfill('0')
+            << setw(2) << waktuPtr->tm_mday << "-"
+            << setw(2) << waktuPtr->tm_mon + 1 << "-"
+            << waktuPtr->tm_year + 1900;
+
+    return tanggal.str();
+}
+
+// DASHBOARD UTAMA
 void dashboardUtama() {
 
     cout << "========================================\n";
     cout << "             POLIKLINIK SEHAT\n";
     cout << "          SISTEM INFORMASI PASIEN\n";
+    cout << "========================================\n";
+
+    cout << "Tanggal : " << tanggalSekarang() << endl;
+    cout << "Waktu   : " << buatWaktu() << " WIB" << endl;
+
     cout << "========================================\n\n";
 
     cout << "  1. USER\n";
@@ -274,17 +281,13 @@ void dashboardUtama() {
     cout << "\n========================================\n";
 }
 
-// ==========================================
-// DEKLARASI MENU
-// ==========================================
 
+// DEKLARASI MENU
 void menuUser();
 void menuDokter();
 
-// ==========================================
-// MENU PENDAFTARAN PASIEN
-// ==========================================
 
+// MENU PENDAFTARAN PASIEN
 void daftarPasien() {
 
     hapusLayar();
@@ -442,9 +445,10 @@ void daftarPasien() {
 
     kunjunganBaru.noAntrean = nomorAntrean.str();
 
-    // TANGGAL KUNJUNGAN
+    // TANGGAL DAN WAKTU PENDAFTARAN
 
     kunjunganBaru.tanggalKunjungan = buatTanggal(true);
+    kunjunganBaru.waktuKunjungan = buatWaktu();
 
     // MENYIMPAN KUNJUNGAN
 
@@ -498,15 +502,16 @@ void daftarPasien() {
     cout << "Tanggal Kunjungan : "
          << kunjunganBaru.tanggalKunjungan << endl;
 
+    cout << "Waktu Pendaftaran : "
+         << kunjunganBaru.waktuKunjungan << " WIB" << endl;
+
     cout << "\nStatus            : Menunggu pemeriksaan\n";
 
     cout << "\nData berhasil disimpan!\n";
 }
 
-// ==========================================
-// MENU CEK PENDAFTARAN
-// ==========================================
 
+// MENU CEK PENDAFTARAN
 void cekPendaftaran() {
 
     hapusLayar();
@@ -579,6 +584,9 @@ void cekPendaftaran() {
             cout << "Tanggal        : "
                  << dataKunjungan[i].tanggalKunjungan << endl;
 
+            cout << "Waktu Daftar   : "
+                 << dataKunjungan[i].waktuKunjungan << " WIB" << endl;
+
             cout << "Keluhan        : "
                  << dataKunjungan[i].keluhan << endl;
 
@@ -598,10 +606,8 @@ void cekPendaftaran() {
     cout << "\nTotal kunjungan : " << ditemukan << endl;
 }
 
-// ==========================================
-// MENU RIWAYAT PEMERIKSAAN PASIEN
-// ==========================================
 
+// MENU RIWAYAT PEMERIKSAAN PASIEN
 void riwayatPemeriksaan() {
 
     hapusLayar();
@@ -675,6 +681,9 @@ void riwayatPemeriksaan() {
             cout << "Tanggal        : "
                  << dataKunjungan[i].tanggalKunjungan << endl;
 
+            cout << "Waktu Daftar   : "
+                 << dataKunjungan[i].waktuKunjungan << " WIB" << endl;
+
             cout << "Keluhan        : "
                  << dataKunjungan[i].keluhan << endl;
 
@@ -694,6 +703,10 @@ void riwayatPemeriksaan() {
                 cout << "Tanggal     : "
                      << dataPeriksa[indeksPeriksa].tanggalPeriksa
                      << endl;
+
+                cout << "Waktu       : "
+                     << dataPeriksa[indeksPeriksa].waktuPeriksa
+                     << " WIB" << endl;
 
                 cout << "Catatan     : "
                      << dataPeriksa[indeksPeriksa].catatan
@@ -715,10 +728,8 @@ void riwayatPemeriksaan() {
     cout << "\nTotal kunjungan : " << nomor << endl;
 }
 
-// ==========================================
-// LOGIN DOKTER
-// ==========================================
 
+// LOGIN DOKTER
 bool loginDokter() {
 
     string password;
@@ -745,10 +756,8 @@ bool loginDokter() {
     }
 }
 
-// ==========================================
-// MENU ANTRIAN PASIEN UNTUK DOKTER
-// ==========================================
 
+// MENU ANTRIAN PASIEN UNTUK DOKTER
 void antrianPasien() {
 
     hapusLayar();
@@ -893,6 +902,9 @@ void antrianPasien() {
     dataPeriksa[jumlahPeriksa].tanggalPeriksa =
         buatTanggal(false);
 
+    dataPeriksa[jumlahPeriksa].waktuPeriksa =
+        buatWaktu();
+
     dataPeriksa[jumlahPeriksa].catatan =
         catatan;
 
@@ -928,6 +940,13 @@ void antrianPasien() {
     cout << "Nama Dokter : "
          << namaDokter << endl;
 
+    cout << "Tanggal     : "
+         << dataPeriksa[jumlahPeriksa - 1].tanggalPeriksa << endl;
+
+    cout << "Waktu       : "
+         << dataPeriksa[jumlahPeriksa - 1].waktuPeriksa
+         << " WIB" << endl;
+
     cout << "Catatan     : "
          << catatan << endl;
 
@@ -938,10 +957,8 @@ void antrianPasien() {
     cout << "\nRiwayat pemeriksaan tetap tersimpan.\n";
 }
 
-// ==========================================
-// MENU DOKTER
-// ==========================================
 
+// MENU DOKTER
 void menuDokter() {
 
     // LOGIN TERLEBIH DAHULU
@@ -989,10 +1006,8 @@ void menuDokter() {
     } while (true);
 }
 
-// ==========================================
-// MENU USER
-// ==========================================
 
+// MENU USER
 void menuUser() {
 
     string pilihan;
@@ -1043,10 +1058,14 @@ void menuUser() {
     } while (true);
 }
 
-// ==========================================
-// PROGRAM UTAMA
-// ==========================================
 
+
+
+
+
+
+
+// PROGRAM UTAMA
 int main() {
 
     string pilihan;
@@ -1074,7 +1093,7 @@ int main() {
 
             cout << "========================================\n";
             cout << "       TERIMA KASIH TELAH MENGGUNAKAN\n";
-            cout << "          LAYANAN POLIKLINIK\n";
+            cout << "          		LAYANAN KAMI\n";
             cout << "========================================\n";
 
             break;
@@ -1089,4 +1108,3 @@ int main() {
 
     return 0;
 }
-
